@@ -10,15 +10,13 @@ public class CharController : MonoBehaviour {
     private Rigidbody rBody;
     private List<GameObject> groundedObjects = new List<GameObject>();
     private Vector2 inputs = Vector2.zero;
-    public byte jump = 0;
+    private byte jump = 0;
     private bool grounded = false;
 
-    // Start is called before the first frame update
     void Start() {
         rBody = GetComponent<Rigidbody>();
     }
 
-    // Update is called once per frame
     void Update() {
         inputs.Set(
             Input.GetAxisRaw("Horizontal"),
@@ -32,7 +30,7 @@ public class CharController : MonoBehaviour {
     private void FixedUpdate() {
         grounded = groundedObjects.Count > 0;
 
-        rBody.AddForce(inputs.x * moveForce, 0f, inputs.y * moveForce);
+        rBody.AddForce(inputs.x * moveForce * Time.fixedDeltaTime, 0f, inputs.y * moveForce * Time.fixedDeltaTime);
         inputs = Vector3.zero;
 
         if (jump == 4)
@@ -47,8 +45,7 @@ public class CharController : MonoBehaviour {
         //upto 64 contact points, unlikely to ever need >20. List has dynamic scaling
         //List<ContactPoint> contactPoints = new List<ContactPoint>();
         ContactPoint[] contactPoints = new ContactPoint[20];
-        int contactPointsCount = 0;
-        contactPointsCount = collision.GetContacts(contactPoints);
+        int contactPointsCount = collision.GetContacts(contactPoints);
 
         //loop through all contacts and compare contact normal to a specific range
         for (int i = 0; i < contactPointsCount; ++i)
@@ -62,8 +59,7 @@ public class CharController : MonoBehaviour {
         //upto 64 contact points, unlikely to ever need >20. List has dynamic scaling
         //List<ContactPoint> contactPoints = new List<ContactPoint>();
         ContactPoint[] contactPoints = new ContactPoint[20];
-        int contactPointsCount = 0;
-        contactPointsCount = collision.GetContacts(contactPoints);
+        int contactPointsCount = collision.GetContacts(contactPoints);
 
         //loop through all contacts and compare contact normal to a specific range
         for (int i = 0; i < contactPointsCount; ++i)
@@ -76,6 +72,7 @@ public class CharController : MonoBehaviour {
     }
 
     private void OnCollisionExit(Collision collision) {
+        //Is late, takes a few frames to call OnColExit
         groundedObjects.Remove(collision.gameObject);
     }
 }
