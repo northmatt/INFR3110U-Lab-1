@@ -5,51 +5,55 @@ using UnityEngine;
 public class CharController : MonoBehaviour {
     public float moveForce = 0f;
     public float jumpForce = 0f;
-    public float groundedDot = 0f;
+    public float groundedDot = 0.7f;
+    public float cursorSensitivy = 1f;
+    public float gravMult = 1f;
 
+    private PlayerAction playerInput;
     private Rigidbody rBody;
-    private PlayerInput playerInput;
     private List<GameObject> groundedObjects = new List<GameObject>();
     private Vector2 inputs = Vector2.zero;
+    private Vector2 rotation = Vector2.zero;
     private byte jump = 0;
     private bool grounded = false;
 
-    private void OnEnable() {
-        playerInput.Enable();
-    }
+    private void Start() {
+        playerInput = GameController.instance.playerInput;
 
-    private void OnDisable() {
-        playerInput.Disable();
-    }
+        playerInput.Player.Move.performed += cntxt => inputs = cntxt.ReadValue<Vector2>();
+        playerInput.Player.Move.canceled += cntxt => inputs = Vector2.zero;
 
-    private void Awake() {
-        playerInput = new PlayerInput();
-    }
+        playerInput.Player.Look.performed += cntxt => rotation = cntxt.ReadValue<Vector2>() * cursorSensitivy;
+        playerInput.Player.Look.canceled += cntxt => rotation = Vector2.zero;
 
-    void Start() {
+        playerInput.Player.Jump.performed += cntxt => TryJump();
+
+        playerInput.Player.Shoot.performed += cntxt => Shoot();
+
         rBody = GetComponent<Rigidbody>();
     }
 
-    void Update() {
-        inputs = playerInput.Player.Move.ReadValue<Vector2>();
-        Debug.Log(playerInput.Player.Move.triggered + ", " + playerInput.Player.Move.IsPressed() + ", " + playerInput.Player.Move.ReadValue<Vector2>());
-
-        if (playerInput.Player.Jump.triggered && jump == 0 && grounded)
-            jump = 4;
+    private void Update() {
+        //transform.Rotate(0f, rotation.x, 0f);
     }
 
     private void FixedUpdate() {
         grounded = groundedObjects.Count > 0;
 
-        rBody.AddForce(inputs.x * moveForce * Time.fixedDeltaTime, 0f, inputs.y * moveForce * Time.fixedDeltaTime);
-        inputs = Vector3.zero;
+        rBody.AddForce(moveForce * Time.fixedDeltaTime * inputs.x * transform.right + moveForce * Time.fixedDeltaTime * inputs.y * transform.forward);
 
-        if (jump == 4)
+        if (jump == 4) {
             rBody.AddForce(0f, jumpForce, 0f, ForceMode.VelocityChange);
+            --jump;
+        }
 
         //reduce jump cooldown if grounded
         if (jump > 0 && grounded)
             --jump;
+
+        //Add downwards force if ungrounded (RB3D has drag)
+        if (!grounded)
+            rBody.AddForce(Physics.gravity * gravMult, ForceMode.Acceleration);
     }
 
     private void OnCollisionEnter(Collision collision) {
@@ -85,5 +89,22 @@ public class CharController : MonoBehaviour {
     private void OnCollisionExit(Collision collision) {
         //Is late, takes a few frames to call OnColExit
         groundedObjects.Remove(collision.gameObject);
+    }
+
+    private void OnTriggerEnter(Collider other) {
+        if (!other.gameObject.CompareTag("Finish"))
+            return;
+
+        ++GameController.instance.collectables;
+        Destroy(other.gameObject);
+    }
+
+    private void TryJump() {
+        if (jump == 0 && grounded)
+            jump = 4;
+    }
+
+    private void Shoot() { 
+    
     }
 }

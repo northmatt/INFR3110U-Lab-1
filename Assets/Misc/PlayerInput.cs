@@ -189,7 +189,7 @@ public partial class @PlayerInput : IInputActionCollection2, IDisposable
                 {
                     ""name"": ""WASD"",
                     ""id"": ""96b94e51-721b-4214-917b-06d8298ae09f"",
-                    ""path"": ""Dpad(mode=1)"",
+                    ""path"": ""2DVector"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
@@ -198,7 +198,7 @@ public partial class @PlayerInput : IInputActionCollection2, IDisposable
                     ""isPartOfComposite"": false
                 },
                 {
-                    ""name"": ""up"",
+                    ""name"": ""Up"",
                     ""id"": ""3dd6ac1a-9d35-4530-9e12-e5106630ddb4"",
                     ""path"": ""<Keyboard>/w"",
                     ""interactions"": """",
@@ -209,7 +209,7 @@ public partial class @PlayerInput : IInputActionCollection2, IDisposable
                     ""isPartOfComposite"": true
                 },
                 {
-                    ""name"": ""down"",
+                    ""name"": ""Down"",
                     ""id"": ""34ef6ab0-5c68-4e00-a1e3-7c21155c4122"",
                     ""path"": ""<Keyboard>/s"",
                     ""interactions"": """",
@@ -220,8 +220,8 @@ public partial class @PlayerInput : IInputActionCollection2, IDisposable
                     ""isPartOfComposite"": true
                 },
                 {
-                    ""name"": ""left"",
-                    ""id"": ""5bc32d4e-ba1b-4540-9404-0d649ba9f621"",
+                    ""name"": ""Left"",
+                    ""id"": ""e6ce16e4-97e8-4534-8b44-5623dad422bb"",
                     ""path"": ""<Keyboard>/a"",
                     ""interactions"": """",
                     ""processors"": """",
@@ -231,8 +231,8 @@ public partial class @PlayerInput : IInputActionCollection2, IDisposable
                     ""isPartOfComposite"": true
                 },
                 {
-                    ""name"": ""right"",
-                    ""id"": ""257a4de9-77b9-4a62-b0d8-92903533b54c"",
+                    ""name"": ""Right"",
+                    ""id"": ""4fd26109-8045-4068-babe-0b3e0452d48d"",
                     ""path"": ""<Keyboard>/d"",
                     ""interactions"": """",
                     ""processors"": """",
