@@ -8,22 +8,33 @@ public class CharController : MonoBehaviour {
     public float groundedDot = 0f;
 
     private Rigidbody rBody;
+    private PlayerInput playerInput;
     private List<GameObject> groundedObjects = new List<GameObject>();
     private Vector2 inputs = Vector2.zero;
     private byte jump = 0;
     private bool grounded = false;
+
+    private void OnEnable() {
+        playerInput.Enable();
+    }
+
+    private void OnDisable() {
+        playerInput.Disable();
+    }
+
+    private void Awake() {
+        playerInput = new PlayerInput();
+    }
 
     void Start() {
         rBody = GetComponent<Rigidbody>();
     }
 
     void Update() {
-        inputs.Set(
-            Input.GetAxisRaw("Horizontal"),
-            Input.GetAxisRaw("Vertical")
-        );
+        inputs = playerInput.Player.Move.ReadValue<Vector2>();
+        Debug.Log(playerInput.Player.Move.triggered + ", " + playerInput.Player.Move.IsPressed() + ", " + playerInput.Player.Move.ReadValue<Vector2>());
 
-        if (Input.GetButton("Jump") && jump == 0 && grounded)
+        if (playerInput.Player.Jump.triggered && jump == 0 && grounded)
             jump = 4;
     }
 
