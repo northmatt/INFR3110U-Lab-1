@@ -13,11 +13,17 @@ public class CameraController : MonoBehaviour {
 
     private PlayerAction playerInput;
     private Camera cam;
+    private Vector2 rotationInput = Vector2.zero;
     private Vector3 orginOffsetWithRotationCurrent = Vector3.zero;
     private Vector3 orginOffsetWithRotationVel = Vector3.zero;
 
     // Start is called before the first frame update
     void Start() {
+        playerInput = GameController.instance.playerInput;
+
+        playerInput.Player.Look.performed += cntxt => rotationInput = cntxt.ReadValue<Vector2>();
+        playerInput.Player.Look.canceled += cntxt => rotationInput = Vector2.zero;
+
         cam = GetComponent<Camera>();
         orginOffsetWithRotationCurrent = transform.rotation * orginOffsetWithRotation;
     }
@@ -28,11 +34,9 @@ public class CameraController : MonoBehaviour {
             return;
 
         if (!GameController.instance.gamePaused || GameController.instance.CursorLocked) {
-            Vector2 rotInp = GameController.instance.playerInput.Player.Look.ReadValue<Vector2>();
-
             float rotMod = transform.rotation.eulerAngles.x <= 90f ? transform.rotation.eulerAngles.x + 360f : transform.rotation.eulerAngles.x;
-            transform.rotation = Quaternion.Euler(Mathf.Clamp(rotMod - rotInp.y * sensitivity, rotXMinMax.x, rotXMinMax.y),
-                transform.rotation.eulerAngles.y + rotInp.x * sensitivity, 0);
+            transform.rotation = Quaternion.Euler(Mathf.Clamp(rotMod - rotationInput.y * sensitivity, rotXMinMax.x, rotXMinMax.y),
+                transform.rotation.eulerAngles.y + rotationInput.x * sensitivity, 0);
         }
 
         //Info provided is Camera FoV/Aspect Ratio/Near Clip Plane, get topleft of Near Clip Plane's local position in rectagular cordinates

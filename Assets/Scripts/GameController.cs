@@ -7,13 +7,10 @@ public class GameController : MonoBehaviour {
 
     public PlayerAction playerInput;
     public GameObject player;
+    public Canvas editorUI;
     public bool gamePaused = false;
     public bool CursorLocked = false;
     public byte collectables = 0;
-
-    private void Awake() {
-        playerInput = new PlayerAction();
-    }
 
     private void OnEnable() {
         playerInput.Enable();
@@ -23,14 +20,20 @@ public class GameController : MonoBehaviour {
         playerInput.Disable();
     }
 
-    private void Start() {
+    private void Awake() {
+        //Not ideal to init singleton in Awake, but needs to run before any script runs Start()
         if (instance != null) {
             Destroy(this.gameObject);
             return;
         }
 
         instance = this;
-        DontDestroyOnLoad(this.gameObject);
+        playerInput = new PlayerAction();
+    }
+
+    private void Start() {
+        //Need to make it find player on scene reload, also cameras on EditorManager
+        //DontDestroyOnLoad(this.gameObject);
 
         player = GameObject.FindGameObjectWithTag("Player");
 
@@ -40,6 +43,8 @@ public class GameController : MonoBehaviour {
     public void DoPause(bool isPaused) {
         gamePaused = isPaused;
         CursorHidden(!gamePaused);
+
+        Time.timeScale = isPaused ? 0 : 1;
     }
 
     void CursorHidden(bool isHidden) {

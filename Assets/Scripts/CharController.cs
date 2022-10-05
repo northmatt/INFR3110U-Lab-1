@@ -9,11 +9,13 @@ public class CharController : MonoBehaviour {
     public float cursorSensitivy = 1f;
     public float gravMult = 1f;
 
+    public GameObject projectile;
+    public Transform projectilePos;
+
     private PlayerAction playerInput;
     private Rigidbody rBody;
     private List<GameObject> groundedObjects = new List<GameObject>();
     private Vector2 inputs = Vector2.zero;
-    private Vector2 rotation = Vector2.zero;
     private byte jump = 0;
     private bool grounded = false;
 
@@ -22,9 +24,6 @@ public class CharController : MonoBehaviour {
 
         playerInput.Player.Move.performed += cntxt => inputs = cntxt.ReadValue<Vector2>();
         playerInput.Player.Move.canceled += cntxt => inputs = Vector2.zero;
-
-        playerInput.Player.Look.performed += cntxt => rotation = cntxt.ReadValue<Vector2>() * cursorSensitivy;
-        playerInput.Player.Look.canceled += cntxt => rotation = Vector2.zero;
 
         playerInput.Player.Jump.performed += cntxt => TryJump();
 
@@ -57,33 +56,11 @@ public class CharController : MonoBehaviour {
     }
 
     private void OnCollisionEnter(Collision collision) {
-        //upto 64 contact points, unlikely to ever need >20. List has dynamic scaling
-        //List<ContactPoint> contactPoints = new List<ContactPoint>();
-        ContactPoint[] contactPoints = new ContactPoint[20];
-        int contactPointsCount = collision.GetContacts(contactPoints);
-
-        //loop through all contacts and compare contact normal to a specific range
-        for (int i = 0; i < contactPointsCount; ++i)
-            if (Vector3.Dot(contactPoints[i].normal, Vector3.up) > groundedDot) {
-                groundedObjects.Add(collision.gameObject);
-                break;
-            }
+        CheckCollisionNormal(collision);
     }
 
     private void OnCollisionStay(Collision collision) {
-        //upto 64 contact points, unlikely to ever need >20. List has dynamic scaling
-        //List<ContactPoint> contactPoints = new List<ContactPoint>();
-        ContactPoint[] contactPoints = new ContactPoint[20];
-        int contactPointsCount = collision.GetContacts(contactPoints);
-
-        //loop through all contacts and compare contact normal to a specific range
-        for (int i = 0; i < contactPointsCount; ++i)
-            if (Vector3.Dot(contactPoints[i].normal, Vector3.up) > groundedDot) {
-                if (!groundedObjects.Contains(collision.gameObject)) groundedObjects.Add(collision.gameObject);
-                return;
-            }
-
-        groundedObjects.Remove(collision.gameObject);
+        CheckCollisionNormal(collision);
     }
 
     private void OnCollisionExit(Collision collision) {
@@ -99,12 +76,32 @@ public class CharController : MonoBehaviour {
         Destroy(other.gameObject);
     }
 
+    private void CheckCollisionNormal(Collision collision) {
+        //upto 64 contact points, unlikely to ever need >20. List has dynamic scaling
+        //List<ContactPoint> contactPoints = new List<ContactPoint>();
+        ContactPoint[] contactPoints = new ContactPoint[20];
+        int contactPointsCount = collision.GetContacts(contactPoints);
+
+        //loop through all contacts and compare contact normal to a specific range
+        for (int i = 0; i < contactPointsCount; ++i)
+            if (Vector3.Dot(contactPoints[i].normal, Vector3.up) > groundedDot) {
+                if (!groundedObjects.Contains(collision.gameObject)) groundedObjects.Add(collision.gameObject);
+                return;
+            }
+
+        groundedObjects.Remove(collision.gameObject);
+    }
+
     private void TryJump() {
         if (jump == 0 && grounded)
             jump = 4;
     }
 
-    private void Shoot() { 
-    
+    private void Shoot() {
+        if (EditorManager.instance.editorMode)
+            return;
+
+        Rigidbody bulletRb = Instantiate(projectile, projectilePos.transform.position, Quaternion.identity).GetComponent<Rigidbody>();
+        bulletRb.AddForce(transform.forward * 32f + transform.up * 1f, ForceMode.Impulse);
     }
 }
